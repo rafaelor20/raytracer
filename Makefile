@@ -19,3 +19,6 @@ $(OBJ_DIR)/%.o: include/%.cpp
 
 obj/olcPixelGameEngine.h.ghc: include/olcPixelGameEngine.h
 	$(CC)  include/olcPixelGameEngine.h -o obj/olcPixelGameEngine.h.ghc
+
+run: all
+	./$(NOME_PROJ)
