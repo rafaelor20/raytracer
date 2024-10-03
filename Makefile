@@ -1,6 +1,6 @@
 NOME_PROJ=teste
 CC=g++
-FLAGS= -g -pg -lX11 -lGL -lpthread -lpng -lstdc++fs -std=c++20
+FLAGS= -g -pg -lX11 -lGL -ltbb -lpthread -lpng -lstdc++fs -std=c++20
 
 SRC=$(wildcard *.cpp include/*.cpp)
 OBJ_DIR=obj

@@ -2,12 +2,14 @@
 #include <string>
 #define OLC_PGE_APPLICATION
 #include "include/olcPixelGameEngine.h"
-
 #include "include/Hittable.h"
 #include "include/HittableList.h"
 #include "include/Sphere.h"
 #include "include/color.h"
 #include "include/rtweekend.h"
+#include <execution>
+#include <vector>
+
 
 class Example : public olc::PixelGameEngine {
 public:
@@ -129,29 +131,41 @@ public:
       return false;
     }
 
-    for (int y = 0; y < image_height; y++)
-      for (int x = 0; x < image_width; x++) {
-        auto pixel_center =
-            pixel00_loc + (x * pixel_delta_u) + (y * pixel_delta_v);
+    std::vector<std::pair<int, int>> pixels;
+    pixels.reserve(image_width * image_height);
+
+    // Collect all pixel coordinates into a vector
+    for (int y = 0; y < image_height; y++) {
+        for (int x = 0; x < image_width; x++) {
+            pixels.emplace_back(x, y);
+        }
+    }
+
+    // Parallel rendering
+    std::for_each(std::execution::par, pixels.begin(), pixels.end(), [&](const std::pair<int, int>& pixel) {
+        int x = pixel.first;
+        int y = pixel.second;
+
+        auto pixel_center = pixel00_loc + (x * pixel_delta_u) + (y * pixel_delta_v);
         auto ray_direction = pixel_center - center;
         Ray r(center, ray_direction);
 
         color pixel_color(0, 0, 0);
         for (int sample = 0; sample < samples_per_pixel; sample++) {
-          Ray r = get_ray(x, y);
-          pixel_color += ray_color(r, max_depth, world);
+            Ray r = get_ray(x, y);
+            pixel_color += ray_color(r, max_depth, world);
         }
         pixel_color *= pixel_samples_scale;
-        static const interval intensity(0.000, 0.999);
-        int rbyte =
-            int(256 * intensity.clamp(linear_to_gamma(pixel_color.x())));
-        int gbyte =
-            int(256 * intensity.clamp(linear_to_gamma(pixel_color.y())));
-        int bbyte =
-            int(256 * intensity.clamp(linear_to_gamma(pixel_color.z())));
-        Draw(x, y, olc::Pixel(rbyte, gbyte, bbyte));
-      }
 
+        static const interval intensity(0.000, 0.999);
+        int rbyte = int(256 * intensity.clamp(linear_to_gamma(pixel_color.x())));
+        int gbyte = int(256 * intensity.clamp(linear_to_gamma(pixel_color.y())));
+        int bbyte = int(256 * intensity.clamp(linear_to_gamma(pixel_color.z())));
+
+        // Draw the pixel
+        Draw(x, y, olc::Pixel(rbyte, gbyte, bbyte));
+    });
+    
     DrawString(0, 0, "FPS: " + std::to_string(GetFPS()), olc::BLACK);
 
     frame_count++;  // Incrementa o contador de frames
