@@ -9,6 +9,8 @@
 #include "include/rtweekend.h"
 #include <execution>
 #include <vector>
+#include <iostream>
+#include <tbb/tbb.h>
 
 
 class Example : public olc::PixelGameEngine {
@@ -240,9 +242,16 @@ private:
 };
 
 int main() {
+  // Initialize the TBB scheduler and specify the number of threads (optional)
+  tbb::global_control control(tbb::global_control::max_allowed_parallelism, tbb::this_task_arena::max_concurrency());
+
   Example demo;
   if (demo.Construct(400, 225, 1, 1))
     demo.Start();
+
+  // Print the number of threads being used
+  std::cout << "Number of threads used: " 
+    << tbb::this_task_arena::max_concurrency() << std::endl;
 
   return 0;
 }
