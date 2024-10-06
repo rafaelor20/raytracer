@@ -115,10 +115,22 @@ public:
     auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
     world.add(make_shared<Sphere>(point3(4, 1, 0), 1.0, material3));
 
+    frame_count = 0;  // Inicializa contador de frames
+    max_frames = 1; // Defina quantos frames deseja renderizar
+    start_time = std::chrono::high_resolution_clock::now(); // Marca o início
+
     return true;
   }
 
   bool OnUserUpdate(float fElapsedTime) override {
+        
+    if (frame_count >= max_frames) {
+      auto end_time = std::chrono::high_resolution_clock::now();
+      auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+      std::cout << "Renderização completa em " << duration << " ms" << std::endl;
+      return false;
+    }
+
     for (int y = 0; y < image_height; y++)
       for (int x = 0; x < image_width; x++) {
         auto pixel_center =
@@ -143,6 +155,7 @@ public:
       }
 
     DrawString(0, 0, "FPS: " + std::to_string(GetFPS()), olc::BLACK);
+    frame_count++;  // Incrementa o contador de frames
     return true;
   }
 
@@ -167,6 +180,10 @@ private:
   double focus_dist = 10;
   Vec3 defocus_disk_u;
   Vec3 defocus_disk_v;
+
+  int frame_count;  // Contador de frames
+  int max_frames;   // Número máximo de frames
+  std::chrono::high_resolution_clock::time_point start_time; // Tempo de início
 
   Ray get_ray(int i, int j) const {
     // Construct a camera ray originating from the origin and directed at
