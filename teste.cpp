@@ -120,7 +120,7 @@ public:
     world.add(make_shared<Sphere>(point3(4, 1, 0), 1.0, material3));
 
     frame_count = 0;  // Inicializa contador de frames
-    max_frames = 3; // Defina quantos frames deseja renderizar
+    max_frames = 1; // Defina quantos frames deseja renderizar
     start_time = std::chrono::high_resolution_clock::now(); // Marca o início
     return true;
   }
@@ -242,16 +242,10 @@ private:
 };
 
 int main() {
-  // Initialize the TBB scheduler and specify the number of threads (optional)
-  tbb::global_control control(tbb::global_control::max_allowed_parallelism, tbb::this_task_arena::max_concurrency());
 
   Example demo;
   if (demo.Construct(400, 225, 1, 1))
     demo.Start();
-
-  // Print the number of threads being used
-  std::cout << "Number of threads used: " 
-    << tbb::this_task_arena::max_concurrency() << std::endl;
 
   return 0;
 }
